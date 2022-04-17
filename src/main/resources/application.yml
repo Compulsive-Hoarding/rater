@@ -1,0 +1,9 @@
+server:
+  port: 8081
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:8080/realms/hoarding/protocol/openid-connect/certs}
