@@ -1,6 +1,6 @@
 package com.ch2.rater.service;
 
-import lombok.RequiredArgsConstructor;
+import com.ch2.rater.security.SecurityUtils;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
@@ -12,17 +12,15 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
-public class LinkService {
+public record LinkService(Driver driver) {
     private static final String ADD_LINK_QUERY = "Merge (l:Link {id: $link_id}) " +
-            "With * " +
-            "Merge (u:User {id: $user_id}) " +
-            "With * " +
-            "Merge (u)-[r:Rated]->(l)";
+                                                     "With * " +
+                                                     "Merge (u:User {id: $user_id}) " +
+                                                     "With * " +
+                                                     "Merge (u)-[r:Rated]->(l)";
 
-    private final Driver driver;
-
-    public void addLink(String url, String userId) {
+    public void addLink(String url) {
+        String userId = SecurityUtils.getCurrentUserId();
         try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
             session.writeTransaction(addLinkTransaction(url, userId));
         }
@@ -31,9 +29,9 @@ public class LinkService {
     private static TransactionWork<Result> addLinkTransaction(String url, String userId) {
         return tx -> {
             Map<String, Object> params = Map.of(
-                    "link_id", url,
-                    "user_id", userId
-                    );
+                "link_id", url,
+                "user_id", userId
+            );
 
             try {
                 return tx.run(ADD_LINK_QUERY, params);

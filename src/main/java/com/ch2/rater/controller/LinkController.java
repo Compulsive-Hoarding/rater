@@ -16,7 +16,6 @@ public class LinkController {
 
     @PostMapping
     public void addLink(@RequestBody LinkBody linkBody) {
-        System.out.println(linkBody.url());
-        linkService.addLink(linkBody.url(), linkBody.userId());
+        linkService.addLink(linkBody.url());
     }
 }

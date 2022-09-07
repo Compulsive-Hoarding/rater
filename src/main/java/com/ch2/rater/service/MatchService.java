@@ -1,6 +1,6 @@
 package com.ch2.rater.service;
 
-import lombok.RequiredArgsConstructor;
+import com.ch2.rater.security.SecurityUtils;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
@@ -13,18 +13,17 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
-public class MatchService {
+public record MatchService(Driver driver) {
     private static final String GET_MATCHES_QUERY = "Match (u1: User {id: $user_id})-[r1:Rated]->" +
-            "(l:Link)" +
-            "<-[r2:Rated]-(u2: User) " +
-            "Return u2.id " +
-            "Limit 10";
-    private final Driver driver;
+                                                        "(l:Link)" +
+                                                        "<-[r2:Rated]-(u2: User) " +
+                                                        "Return u2.id " +
+                                                        "Limit 10";
 
     public List<String> getMatches() {
+        String userId = SecurityUtils.getCurrentUserId();
         try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
-            return session.readTransaction(getMatchesTransaction("123123"));
+            return session.readTransaction(getMatchesTransaction(userId));
         }
     }
 
